@@ -1,8 +1,0 @@
-[cluster:vars]
-ansible_user=fai  # ssh login user
-ansible_become=yes  # use sudo 
-ansible_become_method=sudo 
-ansible_become_pass='{{ my_cluser_sudo_pass }}'
-
-[cluster]
-node-004
