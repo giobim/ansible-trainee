@@ -1,1 +1,2 @@
+dummy
 vault-password.txt
