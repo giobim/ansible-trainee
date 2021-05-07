@@ -1,0 +1,5 @@
+[localhost]
+ansible_user=demo
+ansible_become=yes
+ansible_become_method=sudo
+ansible_become_pass='{{ cluster_sudo_password }}'
