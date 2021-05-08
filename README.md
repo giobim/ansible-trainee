@@ -66,10 +66,11 @@ Command> save
 ```
 
 Securely export this directory to NEWMASTER:
+
 ```shell
-gpg --homedir . --export -a deployer >/tmp/$NEWMASTER/pubkey.txt
-tar cvf /tmp/keys.tar .
-rsync -avP /tmp/keys.tar $NEWMASTER.domain.name:/tmp/
+gpg --homedir . --export -a deployer >$(pwd)/pubkey.txt
+tar cvf /tmp/${NEWMASTER}_keys.tar .
+rsync -avP /tmp/${NEWMASTER}_keys.tar $NEWMASTER.domain.name:/tmp/
 ```
 
 On NEWMASTER, receive the new GnuPG config for the deployer account:
