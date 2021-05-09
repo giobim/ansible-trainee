@@ -71,7 +71,7 @@ Securely export this directory to NEWMASTER:
 ```shell
 gpg --homedir . --export -a deployer >$(pwd)/pubkey.txt
 tar cvf /tmp/${NEWMASTER}_keys.tar .
-rsync -avP /tmp/${NEWMASTER}_keys.tar $NEWMASTER.domain.name:/tmp/
+rsync -avP /tmp/${NEWMASTER}_keys.tar $NEWMASTER:/tmp/
 ```
 
 On NEWMASTER, receive the new GnuPG config for the deployer account:
@@ -79,14 +79,14 @@ On NEWMASTER, receive the new GnuPG config for the deployer account:
 ```shell
 sudo -u deployer bash
 mkdir -m 0700 -p ~/.gnupg
-cd ~/.gnupg && tar xvf /tmp/keys.tar
+cd ~/.gnupg && tar xvf /tmp/*_keys.tar
 ```
 
 Back on your secure machine, add the new email address to .blackbox/blackbox-admins.txt:
 
 ```shell
 $ cd /path/to/the/repo
-$ blackbox_addadmin $KEYNAME /tmp/NEWMASTER
+$ blackbox_addadmin $KEYNAME /tmp/$NEWMASTER
 $ git commit -m'NEW ADMIN: deployer@NEWMASTER.domain.name' .
 ```
 
@@ -108,6 +108,11 @@ remote: Compressing objects: 100% (72/72), done.
 remote: Total 120 (delta 46), reused 108 (delta 39), pack-reused 0
 Receiving objects: 100% (120/120), 41.08 KiB | 2.42 MiB/s, done.
 Resolving deltas: 100% (46/46), done.
+```
+Install balckbox on the host using the package for your platform and decrypt all the encrypted files :
+
+```shell
+demo@node-001:~$ sudo dpkg -i 
 demo@node-001:~$ cd ansible-trainee/
 demo@node-001:~/ansible-trainee$ blackbox_postdeploy
 ========== Importing keychain: START
@@ -128,12 +133,12 @@ If you get "gpg: decryption failed: No secret key" then you forgot to re-encrypt
 On your secured host, securely delete your files:
 
 ```shell
-cd /tmp/NEWMASTER
+cd /tmp/$NEWMASTER
 # On machines with the "shred" command:
-shred -u /tmp/keys.tar
+shred -u /tmp/${NEWMASTER}_keys.tar
 find . -type f -print0 | xargs -0 shred -u
 # All else:
-rm -rf /tmp/NEWMASTER
+cd ~ && rm -rf /tmp/$NEWMASTER
 ```
 
 Also shred any other temporary files you may have made.
@@ -151,13 +156,13 @@ So we create a `.githooks/global` folder and add the `post-checkout`script:
 #!/usr/bin/sh
 /usr/bin/blackbox_postdeploy
 ```
-We set the global config:
+We set the global config and file mode:
 
 ```shell
-$ git config --global core.hooksPath ~/.githooks/global
+$ git config --global core.hooksPath ~/.githooks/global && chmod +x .githooks/global/post-checkout
 ```
 
-We need to install balckbox on the host using the package for the platform and when all is in place, we can now test:
+When all is in place, we can now test:
 
 ```shell
 $ git clone -v -v https://github.com/giobim/ansible-trainee.git
@@ -234,9 +239,13 @@ localhost                  : ok=3    changed=1    unreachable=0    failed=0
 
 ```
 
-## GIT only implementation
+## Improvements
 
+### GIT crypt transparent implementation
 BlackBox works but if you want a better GIT-centric implementation then git-crypt [[9]](#9) offers a much more transparent integration. I'll consider this improvement.
+
+### Automating the creation of the automated user GPG key
+I need to create of an automated user GPG key an keyring. Automate the process above or investigate if `git-crypt` provide a ready-made solution.
 
 That's all, folks!
 
