@@ -3,7 +3,7 @@
 Example Ansible configuration to accompany a series of articles I am writing.
 
 ## Use
-On a remote client use `ansible-playbook` command to run the `local.yml` playbook, i.e. with a user that can us `sudo` without giving his/her password:
+On a remote client use `ansible-playbook` [[1]](#1) command to run the `local.yml` playbook, i.e. with a user that can us `sudo` without giving his/her password:
 
 ```shell
 $ ansible-pull -U https://github.com/giobim/ansible-trainee.git -vv local.yml
@@ -13,11 +13,11 @@ Now, this command should be run by a user able to `sudo` without a password othe
 
 ## Securing
 
-Using a user that has sudo access without password is hihghly insecure. We can solve this issue using ansible vaults to store the sensitive information but we still need to persist the vault password itself. A way to solve this chicken-egg problem is to persist the vault password in the same repository and to use [BlackBox](https://github.com/StackExchange/blackbox) to secure this password. 
+Using a user that has sudo access without password is hihghly insecure. We can solve this issue using ansible vaults to store the sensitive information but we still need to persist the vault password itself. A way to solve this chicken-egg problem is to persist the vault password in the same repository and to use `BlackBox` [[4]](#4) to secure this password. 
 
-`BB` scripts make it easy to encrypt and decrypt them when you need to view or edit them. You also can decrypt them automatically for use in production without prompting you for a password.
+`BlackBox` scripts make it easy to encrypt and decrypt them when you need to view or edit them. You also can decrypt them automatically for use in production without prompting you for a password.
 
- If you don't have a GPG key, set it up using, for example, [these instructions](https://help.github.com/articles/generating-a-new-gpg-key/) then, get in touch with the owner of this repository, he/her will add your GPG public key to allow you to decrypt those files.
+ If you don't have a GPG key, set it up using, for example, these instructions [[9]](#9) then, get in touch with the owner of this repository, he/her will add your GPG public key to allow you to decrypt those files.
 
 ## Decrypting in production using an automated user
 
@@ -141,7 +141,7 @@ Also shred any other temporary files you may have made.
 ## GIT Automation
 
 When the client checks out the repository it should execute the `blackbox_postdeploy` command inside the repository.
-A way to let GIT do this is to create a global folder holding the hook you want to execute.
+A way to let GIT do this is to create a global folder holding the hook [[7]](#7) you want to execute.
 
 However, this is a global setting which means it will get executed for every repository you are using on this host. This may be a problem if it was not limited to the per-user  configuration.
 
@@ -191,7 +191,7 @@ gpg:              unchanged: 3
 Success!
 
 ## Putting all together
-Ansible uses a vault to store the `demo` user password to get sudo access. The vault password is stored in a gpg encrypted file in the repository. It get decrypted by the above hook using a **password-less** public key **if found** in the user GNUPG tresor.
+Ansible uses a vault to store the `demo` user password to get sudo access. The vault password is stored in a gpg encrypted file in the repository [[3]](#3) [[8]](#8). It get decrypted by the above hook using a **password-less** public key **if found** in the user GNUPG tresor.
 It is perfectly safe to use as far as the client has the necessary private key.
 
 The last problem is that `ansible-pull` must find the vault password file somewhere in the repository this means the location given to `--vault-password-file` should be the full path. A simple solution is to set the destination of the checkout somewhere known at call.
@@ -234,4 +234,30 @@ localhost                  : ok=3    changed=1    unreachable=0    failed=0
 
 ```
 
+## GIT only implementation
+
+BlackBox works but if you want a better GIT-centric implementation then git-crypt [[9]](#9) offers a much more transparent integration. I'll consider this improvement.
+
 That's all, folks!
+
+## References
+
+<a id="1">[1]</a> `ansible-pull` documentation, https://docs.ansible.com/ansible/latest/cli/ansible-pull.html
+
+<a id="2">[2]</a> "How to set and use sudo password for Ansible Vault", Vivek Gite Last updated: January 2, 2019, https://www.cyberciti.biz/faq/how-to-set-and-use-sudo-password-for-ansible-vault/
+
+<a id="3">[3]</a> Ansible Vault Guide, https://docs.ansible.com/ansible/2.8/user_guide/vault.html
+
+<a id="4">[4]</a> BlackBox from StackExchange, https://github.com/StackExchange/blackbox#blackbox
+
+<a id="5">[5]</a> git-crypt, transparent file encryption in git, Andrew Ayer, https://www.agwa.name/projects/git-crypt/
+
+<a id="6">[6]</a> gpg2 – importing, exporting and revoking your keys, Shivinder, August 23, 2019, https://terminaltwister.com/gpg2-export-import-revoke-keys/
+
+<a id="7">[7]</a> How To Use Git Hooks To Automate Development and Deployment Tasks, Justin Ellingwood, August 12, 2014, https://www.digitalocean.com/community/tutorials/how-to-use-git-hooks-to-automate-development-and-deployment-tasks
+
+<a id="8">[8]</a> Ansible Guide, Using Variables, https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html
+
+<a id="9">[9]</a> Generating a new GPG key, https://docs.github.com/en/github/authenticating-to-github/generating-a-new-gpg-key
+
+
