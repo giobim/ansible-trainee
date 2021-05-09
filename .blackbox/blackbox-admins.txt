@@ -1,3 +1,4 @@
 deployer@node-001.home.lab
 deployer@node-002.home.lab
+deployer@node-003.home.lab
 Giovanni.Binda@versatile.ch
