@@ -28,6 +28,7 @@ GPG keys have to have a passphrase. However, passphrases are optional on subkeys
 We now will create the target gnupg keys on a secured host (yourself) for the NEWMASTER:
 
 ```shell
+$ export NEWMASTER=node-001
 $ mkdir /tmp/$NEWMASTER
 $ cd /tmp/$NEWMASTER
 $ gpg --homedir . --gen-key
@@ -85,7 +86,7 @@ cd ~/.gnupg && tar xvf /tmp/*_keys.tar
 Back on your secure machine, add the new email address to .blackbox/blackbox-admins.txt:
 
 ```shell
-$ cd /path/to/the/repo
+$ cd $OLDPWD
 $ blackbox_addadmin $KEYNAME /tmp/$NEWMASTER
 $ git commit -m'NEW ADMIN: deployer@NEWMASTER.domain.name' .
 ```
@@ -112,7 +113,7 @@ Resolving deltas: 100% (46/46), done.
 Install balckbox on the host using the package for your platform and decrypt all the encrypted files :
 
 ```shell
-demo@node-001:~$ sudo dpkg -i 
+demo@node-001:~$ sudo dpkg -i stack-blackbox_1.0-517_all.deb
 demo@node-001:~$ cd ansible-trainee/
 demo@node-001:~/ansible-trainee$ blackbox_postdeploy
 ========== Importing keychain: START
@@ -150,7 +151,7 @@ A way to let GIT do this is to create a global folder holding the hook [[7]](#7)
 
 However, this is a global setting which means it will get executed for every repository you are using on this host. This may be a problem if it was not limited to the per-user  configuration.
 
-So we create a `.githooks/global` folder and add the `post-checkout`script:
+So we create a `~/.githooks/global` folder and add the `~/.githooks/global/post-checkout`script:
 
 ```bash
 #!/usr/bin/sh
@@ -159,7 +160,8 @@ So we create a `.githooks/global` folder and add the `post-checkout`script:
 We set the global config and file mode:
 
 ```shell
-$ git config --global core.hooksPath ~/.githooks/global && chmod +x .githooks/global/post-checkout
+$ git config --global core.hooksPath ~/.githooks/global \
+&& chmod +x ~/.githooks/global/post-checkout
 ```
 
 When all is in place, we can now test:
@@ -245,7 +247,7 @@ localhost                  : ok=3    changed=1    unreachable=0    failed=0
 BlackBox works but if you want a better GIT-centric implementation then git-crypt [[9]](#9) offers a much more transparent integration. I'll consider this improvement.
 
 ### Automating the creation of the automated user GPG key
-I need to create of an automated user GPG key an keyring. Automate the process above or investigate if `git-crypt` provide a ready-made solution.
+I need to create of an automated user GPG key and keyring keyring. Automate the process above using unattended key generation and update the NEWMASTER host. Schedule a build process using Jenkins. 
 
 That's all, folks!
 
